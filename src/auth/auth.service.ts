@@ -10,17 +10,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(username: string, pass: string): Promise<any> {
+  async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(username);
     const isValiPassword = await comparePasswordHelper(pass, user.password);
-    if (!isValiPassword) {
-      throw new UnauthorizedException('Sai tên đăng nhập hoặc mật khẩu');
-    }
 
+    if (!user || !isValiPassword) return null;
+
+    return user;
+  }
+
+  async login(user: any) {
     const payload = { username: user.email, sub: user._id };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: this.jwtService.sign(payload),
     };
-
   }
 }
